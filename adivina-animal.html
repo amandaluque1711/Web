@@ -11,66 +11,66 @@ body{
     margin:0;
     padding:20px;
     font-family:'Baloo 2', cursive;
-    background: linear-gradient(135deg,#ffd166,#ef476f);
+    background: linear-gradient(135deg,#a0e7e5,#ffaebc);
     text-align:center;
     overflow:hidden;
 }
 
 h1{
-    color:#fff;
     font-size:3em;
-    text-shadow:3px 3px #ff006e;
-}
-
-#score{
     color:#fff;
-    font-size:1.6em;
+    text-shadow:3px 3px #ff6f91;
 }
 
-.game{
+#puntos{
+    font-size:1.6em;
+    color:#fff;
+    margin-bottom:20px;
+}
+
+.juego{
     display:flex;
     justify-content:center;
     align-items:center;
     gap:80px;
-    margin-top:40px;
+    margin-top:30px;
 }
 
-.left img{
-    width:280px;
-    height:220px;
-    object-fit:cover;
+.izquierda img{
+    width:220px;
+    background:#fff;
     border-radius:25px;
-    border:6px dashed #fff;
-    background:#fff;
+    padding:15px;
+    border:6px dashed #ff6f91;
 }
 
-.right{
+.derecha{
     display:flex;
-    gap:20px;
+    gap:25px;
 }
 
-.right img{
-    width:180px;
-    height:220px;
-    object-fit:cover;
-    border-radius:20px;
-    cursor:pointer;
-    border:5px solid transparent;
-    transition:0.3s;
+.derecha img{
+    width:140px;
     background:#fff;
+    border-radius:20px;
+    padding:10px;
+    cursor:pointer;
+    transition:0.3s;
+    border:5px solid transparent;
 }
 
-.right img:hover{
+.derecha img:hover{
     transform:scale(1.1);
-    border-color:#06d6a0;
+    border-color:#4CAF50;
 }
 
-#feedback{
+#resultado{
     font-size:5em;
     height:80px;
+    margin-top:15px;
 }
 
-#animalName{
+#nombreAnimal{
     font-size:2em;
     color:#fff;
 }
@@ -87,134 +87,115 @@ canvas{
 <body>
 
 <h1>🐾 Adivina el Animal 🐾</h1>
-<div id="score">⭐ Puntos: 0</div>
+<div id="puntos">⭐ Puntos: 0</div>
 
-<div class="game">
-    <div class="left">
-        <img id="leftImg">
+<div class="juego">
+    <div class="izquierda">
+        <img id="animalObjetivo">
     </div>
-    <div class="right" id="options"></div>
+    <div class="derecha" id="opciones"></div>
 </div>
 
-<div id="feedback"></div>
-<div id="animalName"></div>
+<div id="resultado"></div>
+<div id="nombreAnimal"></div>
 
 <canvas id="canvas"></canvas>
 
 <script>
-// 🔊 VOZ EN ESPAÑOL
-function hablar(texto){
-    const voz = new SpeechSynthesisUtterance(texto);
-    voz.lang = "es-ES";
-    voz.rate = 0.9;
-    speechSynthesis.speak(voz);
-}
+// 🔊 Sonidos
+const sonidoBien = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_9e5e1c0d1f.mp3");
+const sonidoMal = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_3b0c1e6c91.mp3");
 
-// 🐶 ANIMALES (IMÁGENES COMPLETAS)
+// 🐶 Animales infantiles (imágenes tipo dibujo)
 const animales = [
-{
- nombre:"perro",
- img:"https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=60"
-},
-{
- nombre:"gato",
- img:"https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=800&q=60"
-},
-{
- nombre:"león",
- img:"https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=800&q=60"
-},
-{
- nombre:"jirafa",
- img:"https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=800&q=60"
-},
-{
- nombre:"cebra",
- img:"https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=60"
-},
-{
- nombre:"cocodrilo",
- img:"https://images.unsplash.com/photo-1610878180933-1237283c9f2e?auto=format&fit=crop&w=800&q=60"
-}
+ {nombre:"Perro", img:"https://cdn-icons-png.flaticon.com/512/616/616408.png"},
+ {nombre:"Gato", img:"https://cdn-icons-png.flaticon.com/512/616/616430.png"},
+ {nombre:"León", img:"https://cdn-icons-png.flaticon.com/512/616/616412.png"},
+ {nombre:"Jirafa", img:"https://cdn-icons-png.flaticon.com/512/616/616415.png"},
+ {nombre:"Cebra", img:"https://cdn-icons-png.flaticon.com/512/616/616418.png"},
+ {nombre:"Cocodrilo", img:"https://cdn-icons-png.flaticon.com/512/616/616419.png"}
 ];
 
 let indice = 0;
 let puntos = 0;
 
-const leftImg = document.getElementById("leftImg");
-const optionsDiv = document.getElementById("options");
-const feedback = document.getElementById("feedback");
-const animalName = document.getElementById("animalName");
-const score = document.getElementById("score");
+const animalObjetivo = document.getElementById("animalObjetivo");
+const opcionesDiv = document.getElementById("opciones");
+const resultado = document.getElementById("resultado");
+const nombreAnimal = document.getElementById("nombreAnimal");
+const puntosDiv = document.getElementById("puntos");
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-function cargar(){
+// 🎮 Cargar juego
+function cargarJuego(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    feedback.textContent="";
-    animalName.textContent="";
+    resultado.textContent = "";
+    nombreAnimal.textContent = "";
 
     const actual = animales[indice];
-    leftImg.src = actual.img;
+    animalObjetivo.src = actual.img;
 
-    optionsDiv.innerHTML="";
+    opcionesDiv.innerHTML = "";
 
-    let opciones = animales
-        .filter(a => a !== actual)
+    let opciones = [...animales]
         .sort(()=>Math.random()-0.5)
         .slice(0,2);
 
-    opciones.push(actual);
+    if(!opciones.includes(actual)) opciones.push(actual);
     opciones.sort(()=>Math.random()-0.5);
 
-    opciones.forEach(op=>{
+    opciones.forEach(animal=>{
         const img = document.createElement("img");
-        img.src = op.img;
-        img.onclick = ()=>comprobar(op,img);
-        optionsDiv.appendChild(img);
+        img.src = animal.img;
+        img.onclick = ()=>comprobar(animal, img);
+        opcionesDiv.appendChild(img);
     });
 }
 
-function comprobar(op,img){
-    if(op === animales[indice]){
-        dibujarLinea(leftImg,img,"green");
-        feedback.textContent="👍";
-        animalName.textContent="¡Es un " + op.nombre + "!";
-        hablar("¡Muy bien! Es un " + op.nombre);
+// ✅ Comprobar respuesta
+function comprobar(animal,img){
+    if(animal.nombre === animales[indice].nombre){
+        sonidoBien.play();
+        dibujarLinea(animalObjetivo,img,"green");
+        resultado.textContent = "👍";
+        nombreAnimal.textContent = "¡Es un " + animal.nombre + "!";
         puntos++;
-        score.textContent="⭐ Puntos: " + puntos;
+        puntosDiv.textContent = "⭐ Puntos: " + puntos;
 
         setTimeout(()=>{
             indice = (indice + 1) % animales.length;
-            cargar();
+            cargarJuego();
         },1500);
     }else{
-        dibujarLinea(leftImg,img,"red");
-        feedback.textContent="❌";
-        hablar("Inténtalo otra vez");
+        sonidoMal.play();
+        dibujarLinea(animalObjetivo,img,"red");
+        resultado.textContent = "❌";
         setTimeout(()=>{
-            feedback.textContent="";
+            resultado.textContent="";
             ctx.clearRect(0,0,canvas.width,canvas.height);
-        },900);
+        },800);
     }
 }
 
-function dibujarLinea(a,b,color){
-    const r1 = a.getBoundingClientRect();
-    const r2 = b.getBoundingClientRect();
+// 🟢 Dibujar línea
+function dibujarLinea(origen,destino,color){
+    const r1 = origen.getBoundingClientRect();
+    const r2 = destino.getBoundingClientRect();
 
-    ctx.strokeStyle=color;
-    ctx.lineWidth=6;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 6;
     ctx.beginPath();
     ctx.moveTo(r1.right, r1.top + r1.height/2);
     ctx.lineTo(r2.left, r2.top + r2.height/2);
     ctx.stroke();
 }
 
-cargar();
+// 🚀 Iniciar
+cargarJuego();
 </script>
 
 </body>
