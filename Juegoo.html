@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <title>🐾 Adivina el Animal 🐾</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&display=swap" rel="stylesheet">
 
 <style>
 body{
     margin:0;
     padding:20px;
     font-family:'Baloo 2', cursive;
-    background: linear-gradient(135deg,#ffda77,#ff8fab);
+    background: linear-gradient(135deg,#ffde7d,#ff7a7a);
     text-align:center;
     overflow:hidden;
 }
@@ -19,61 +19,61 @@ body{
 h1{
     color:#fff;
     font-size:3em;
-    text-shadow:3px 3px #ff5d8f;
+    text-shadow:3px 3px #ff4d6d;
 }
 
 #score{
-    font-size:1.6em;
+    font-size:1.7em;
     color:#fff;
-    margin-top:10px;
 }
 
 .game{
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:80px;
+    gap:90px;
     margin-top:40px;
 }
 
-.left img{
-    width:220px;
+.panel{
+    width:240px;
+    height:240px;
+    background:white;
+    border-radius:30px;
+    border:6px dashed #ffd166;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.options{
+    display:flex;
+    gap:25px;
+}
+
+.option{
+    width:160px;
+    height:240px;
     background:white;
     border-radius:25px;
-    padding:10px;
-    border:6px dashed #fff;
-}
-
-.right{
-    display:flex;
-    gap:20px;
-}
-
-.right img{
-    width:140px;
-    background:white;
-    border-radius:20px;
-    padding:8px;
     cursor:pointer;
-    transition:0.3s;
     border:5px solid transparent;
+    transition:0.3s;
 }
 
-.right img:hover{
+.option:hover{
     transform:scale(1.1);
-    border-color:#4CAF50;
+    border-color:#06d6a0;
 }
 
 #feedback{
     font-size:5em;
     height:80px;
-    margin-top:10px;
 }
 
 #animalName{
-    font-size:2em;
+    font-size:2.2em;
     color:#fff;
-    margin-top:5px;
 }
 
 canvas{
@@ -91,10 +91,8 @@ canvas{
 <div id="score">⭐ Puntos: 0</div>
 
 <div class="game">
-    <div class="left">
-        <img id="leftAnimal">
-    </div>
-    <div class="right" id="options"></div>
+    <div class="panel" id="left"></div>
+    <div class="options" id="options"></div>
 </div>
 
 <div id="feedback"></div>
@@ -103,91 +101,137 @@ canvas{
 <canvas id="canvas"></canvas>
 
 <script>
-// 🔊 SONIDOS
-const soundOk = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_9e5e1c0d1f.mp3");
-const soundFail = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_3b0c1e6c91.mp3");
+// ================== VOZ ==================
+function hablar(texto){
+    const voz = new SpeechSynthesisUtterance(texto);
+    voz.lang = "es-ES";
+    voz.rate = 0.9;
+    speechSynthesis.speak(voz);
+}
 
-// 🐶 ANIMALES (cambia imágenes cuando quieras)
-const animals = [
- {name:"Perro", left:"https://i.imgur.com/yK7QG7k.png", right:"https://i.imgur.com/7W4V7zE.png"},
- {name:"Gato", left:"https://i.imgur.com/Zd4V7kM.png", right:"https://i.imgur.com/0YQFZ7F.png"},
- {name:"León", left:"https://i.imgur.com/rA7GZzM.png", right:"https://i.imgur.com/9w6G8ZB.png"}
+// ================== ANIMALES SVG ==================
+const animales = [
+{
+    nombre:"perro",
+    izquierda:`
+    <svg width="220" height="220">
+        <rect x="0" y="0" width="110" height="220" fill="#cdb4db"/>
+        <circle cx="90" cy="90" r="45" fill="#ffc8dd"/>
+        <circle cx="75" cy="80" r="6"/>
+        <rect x="60" y="130" width="40" height="50" rx="20" fill="#ffc8dd"/>
+    </svg>`,
+    derecha:`
+    <svg width="220" height="220">
+        <rect x="110" y="0" width="110" height="220" fill="#cdb4db"/>
+        <circle cx="125" cy="80" r="6"/>
+        <rect x="110" y="110" width="70" height="40" rx="20" fill="#ffc8dd"/>
+    </svg>`
+},
+{
+    nombre:"gato",
+    izquierda:`
+    <svg width="220" height="220">
+        <rect x="0" y="0" width="110" height="220" fill="#bde0fe"/>
+        <polygon points="30,20 60,60 20,60" fill="#a2d2ff"/>
+        <circle cx="85" cy="95" r="40" fill="#a2d2ff"/>
+        <circle cx="70" cy="85" r="6"/>
+    </svg>`,
+    derecha:`
+    <svg width="220" height="220">
+        <rect x="110" y="0" width="110" height="220" fill="#bde0fe"/>
+        <circle cx="125" cy="85" r="6"/>
+        <path d="M125 115 Q135 125 145 115" stroke="#000" stroke-width="4" fill="none"/>
+    </svg>`
+},
+{
+    nombre:"león",
+    izquierda:`
+    <svg width="220" height="220">
+        <rect x="0" y="0" width="110" height="220" fill="#ffd166"/>
+        <circle cx="85" cy="95" r="50" fill="#f4a261"/>
+        <circle cx="70" cy="85" r="6"/>
+    </svg>`,
+    derecha:`
+    <svg width="220" height="220">
+        <rect x="110" y="0" width="110" height="220" fill="#ffd166"/>
+        <circle cx="125" cy="85" r="6"/>
+        <rect x="110" y="120" width="70" height="30" rx="15" fill="#e76f51"/>
+    </svg>`
+}
 ];
 
-let index = 0;
-let score = 0;
+// ================== LÓGICA ==================
+let indice = 0;
+let puntos = 0;
 
-const leftImg = document.getElementById("leftAnimal");
-const optionsDiv = document.getElementById("options");
+const left = document.getElementById("left");
+const options = document.getElementById("options");
 const feedback = document.getElementById("feedback");
 const animalName = document.getElementById("animalName");
-const scoreDiv = document.getElementById("score");
+const score = document.getElementById("score");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-function loadGame(){
+function cargar(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    feedback.textContent = "";
-    animalName.textContent = "";
+    feedback.textContent="";
+    animalName.textContent="";
 
-    const animal = animals[index];
-    leftImg.src = animal.left;
-    optionsDiv.innerHTML = "";
+    left.innerHTML = animales[indice].izquierda;
+    options.innerHTML="";
 
-    let options = animals.map(a=>a.right).sort(()=>Math.random()-0.5).slice(0,2);
-    options.push(animal.right);
-    options.sort(()=>Math.random()-0.5);
+    let opciones = animales.map(a=>a.derecha).sort(()=>Math.random()-0.5).slice(0,2);
+    opciones.push(animales[indice].derecha);
+    opciones.sort(()=>Math.random()-0.5);
 
-    options.forEach(src=>{
-        const img = document.createElement("img");
-        img.src = src;
-        img.onclick = ()=>check(src,img);
-        optionsDiv.appendChild(img);
+    opciones.forEach(svg=>{
+        const div = document.createElement("div");
+        div.className="option";
+        div.innerHTML = svg;
+        div.onclick = ()=>comprobar(svg,div);
+        options.appendChild(div);
     });
 }
 
-function check(src,img){
-    const correct = animals[index];
-
-    if(src === correct.right){
-        soundOk.play();
-        drawLine(leftImg,img,"green");
-        feedback.textContent = "👍";
-        animalName.textContent = "¡Es un " + correct.name + "!";
-        score++;
-        scoreDiv.textContent = "⭐ Puntos: " + score;
+function comprobar(svg,div){
+    if(svg === animales[indice].derecha){
+        dibujarLinea(left,div,"green");
+        feedback.textContent="👍";
+        animalName.textContent="¡Es un " + animales[indice].nombre + "!";
+        hablar("¡Es un " + animales[indice].nombre + "!");
+        puntos++;
+        score.textContent="⭐ Puntos: " + puntos;
 
         setTimeout(()=>{
-            index = (index + 1) % animals.length;
-            loadGame();
-        },1500);
+            indice = (indice+1)%animales.length;
+            cargar();
+        },1600);
     }else{
-        soundFail.play();
-        drawLine(leftImg,img,"red");
-        feedback.textContent = "❌";
+        dibujarLinea(left,div,"red");
+        feedback.textContent="❌";
+        hablar("Inténtalo otra vez");
         setTimeout(()=>{
             feedback.textContent="";
             ctx.clearRect(0,0,canvas.width,canvas.height);
-        },800);
+        },900);
     }
 }
 
-function drawLine(from,to,color){
-    const r1 = from.getBoundingClientRect();
-    const r2 = to.getBoundingClientRect();
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 6;
+function dibujarLinea(a,b,color){
+    const r1 = a.getBoundingClientRect();
+    const r2 = b.getBoundingClientRect();
+    ctx.strokeStyle=color;
+    ctx.lineWidth=6;
     ctx.beginPath();
     ctx.moveTo(r1.right, r1.top + r1.height/2);
     ctx.lineTo(r2.left, r2.top + r2.height/2);
     ctx.stroke();
 }
 
-loadGame();
+cargar();
 </script>
 
 </body>
