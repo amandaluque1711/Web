@@ -11,7 +11,7 @@ body{
     margin:0;
     padding:20px;
     font-family:'Baloo 2', cursive;
-    background: linear-gradient(135deg,#a0e7e5,#ffaebc);
+    background: linear-gradient(135deg,#9bf6ff,#ffc6ff);
     text-align:center;
     overflow:hidden;
 }
@@ -38,7 +38,7 @@ h1{
 
 .izquierda img{
     width:220px;
-    background:#fff;
+    background:white;
     border-radius:25px;
     padding:15px;
     border:6px dashed #ff6f91;
@@ -51,7 +51,7 @@ h1{
 
 .derecha img{
     width:140px;
-    background:#fff;
+    background:white;
     border-radius:20px;
     padding:10px;
     cursor:pointer;
@@ -67,7 +67,7 @@ h1{
 #resultado{
     font-size:5em;
     height:80px;
-    margin-top:15px;
+    margin-top:10px;
 }
 
 #nombreAnimal{
@@ -102,18 +102,16 @@ canvas{
 <canvas id="canvas"></canvas>
 
 <script>
-// 🔊 Sonidos
-const sonidoBien = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_9e5e1c0d1f.mp3");
-const sonidoMal = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_3b0c1e6c91.mp3");
-
-// 🐶 Animales infantiles (imágenes tipo dibujo)
+// 🐶 ANIMALES (tus imágenes)
 const animales = [
- {nombre:"Perro", img:"https://cdn-icons-png.flaticon.com/512/616/616408.png"},
- {nombre:"Gato", img:"https://cdn-icons-png.flaticon.com/512/616/616430.png"},
- {nombre:"León", img:"https://cdn-icons-png.flaticon.com/512/616/616412.png"},
- {nombre:"Jirafa", img:"https://cdn-icons-png.flaticon.com/512/616/616415.png"},
- {nombre:"Cebra", img:"https://cdn-icons-png.flaticon.com/512/616/616418.png"},
- {nombre:"Cocodrilo", img:"https://cdn-icons-png.flaticon.com/512/616/616419.png"}
+ {nombre:"Cebra", img:"img/cebra.png"},
+ {nombre:"Jirafa", img:"img/jirafa.png"},
+ {nombre:"León", img:"img/leon.png"},
+ {nombre:"Mono", img:"img/mono.png"},
+ {nombre:"Cocodrilo", img:"img/cocodrilo.png"},
+ {nombre:"Perro", img:"img/perro.png"},
+ {nombre:"Gato", img:"img/gato.png"},
+ {nombre:"Tigre", img:"img/tigre.png"}
 ];
 
 let indice = 0;
@@ -130,7 +128,6 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// 🎮 Cargar juego
 function cargarJuego(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     resultado.textContent = "";
@@ -138,7 +135,6 @@ function cargarJuego(){
 
     const actual = animales[indice];
     animalObjetivo.src = actual.img;
-
     opcionesDiv.innerHTML = "";
 
     let opciones = [...animales]
@@ -156,10 +152,8 @@ function cargarJuego(){
     });
 }
 
-// ✅ Comprobar respuesta
 function comprobar(animal,img){
     if(animal.nombre === animales[indice].nombre){
-        sonidoBien.play();
         dibujarLinea(animalObjetivo,img,"green");
         resultado.textContent = "👍";
         nombreAnimal.textContent = "¡Es un " + animal.nombre + "!";
@@ -171,7 +165,6 @@ function comprobar(animal,img){
             cargarJuego();
         },1500);
     }else{
-        sonidoMal.play();
         dibujarLinea(animalObjetivo,img,"red");
         resultado.textContent = "❌";
         setTimeout(()=>{
@@ -181,7 +174,6 @@ function comprobar(animal,img){
     }
 }
 
-// 🟢 Dibujar línea
 function dibujarLinea(origen,destino,color){
     const r1 = origen.getBoundingClientRect();
     const r2 = destino.getBoundingClientRect();
@@ -194,7 +186,6 @@ function dibujarLinea(origen,destino,color){
     ctx.stroke();
 }
 
-// 🚀 Iniciar
 cargarJuego();
 </script>
 
