@@ -2,84 +2,61 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>🐾 Adivina el Animal 🐾</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+<title>Adivina el Animal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-    margin:0;
-    padding:20px;
-    font-family:'Baloo 2', cursive;
-    background: linear-gradient(135deg,#9bf6ff,#ffc6ff);
-    text-align:center;
-    overflow:hidden;
+body {
+    margin: 0;
+    font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+    background: linear-gradient(135deg, #a1ffce, #fbc2eb);
+    text-align: center;
 }
 
-h1{
-    font-size:3em;
-    color:#fff;
-    text-shadow:3px 3px #ff6f91;
+h1 {
+    margin-top: 20px;
+    color: #ff4081;
+    text-shadow: 2px 2px #fff;
 }
 
-#puntos{
-    font-size:1.6em;
-    color:#fff;
-    margin-bottom:20px;
+.puntos {
+    font-size: 22px;
+    margin-bottom: 20px;
 }
 
-.juego{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:80px;
-    margin-top:30px;
+.juego {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
 }
 
-.izquierda img{
-    width:220px;
-    background:white;
-    border-radius:25px;
-    padding:15px;
-    border:6px dashed #ff6f91;
+.columna {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.derecha{
-    display:flex;
-    gap:25px;
+.animal {
+    width: 160px;
+    height: 160px;
+    border-radius: 20px;
+    border: 5px dashed #ffffff;
+    background: #fff;
+    cursor: pointer;
+    object-fit: cover;
+    transition: transform 0.2s, border 0.2s;
 }
 
-.derecha img{
-    width:140px;
-    background:white;
-    border-radius:20px;
-    padding:10px;
-    cursor:pointer;
-    transition:0.3s;
-    border:5px solid transparent;
+.animal:hover {
+    transform: scale(1.08);
 }
 
-.derecha img:hover{
-    transform:scale(1.1);
-    border-color:#4CAF50;
-}
-
-#resultado{
-    font-size:5em;
-    height:80px;
-    margin-top:10px;
-}
-
-#nombreAnimal{
-    font-size:2em;
-    color:#fff;
-}
-
-canvas{
-    position:absolute;
-    top:0;
-    left:0;
-    pointer-events:none;
+.resultado {
+    font-size: 80px;
+    height: 90px;
+    margin-top: 20px;
 }
 </style>
 </head>
@@ -87,106 +64,85 @@ canvas{
 <body>
 
 <h1>🐾 Adivina el Animal 🐾</h1>
-<div id="puntos">⭐ Puntos: 0</div>
 
-<div class="juego">
-    <div class="izquierda">
-        <img id="animalObjetivo">
-    </div>
-    <div class="derecha" id="opciones"></div>
+<div class="puntos">
+    ⭐ Puntos: <span id="puntos">0</span>
 </div>
 
-<div id="resultado"></div>
-<div id="nombreAnimal"></div>
+<div class="juego">
 
-<canvas id="canvas"></canvas>
+    <!-- Animal objetivo -->
+    <div class="columna">
+        <img id="animalObjetivo" class="animal">
+    </div>
+
+    <!-- Opciones -->
+    <div class="columna" id="opciones"></div>
+
+</div>
+
+<div class="resultado" id="resultado"></div>
 
 <script>
-// 🐶 ANIMALES (tus imágenes)
 const animales = [
- {nombre:"Cebra", img:"img/cebra.png"},
- {nombre:"Jirafa", img:"img/jirafa.png"},
- {nombre:"León", img:"img/leon.png"},
- {nombre:"Mono", img:"img/mono.png"},
- {nombre:"Cocodrilo", img:"img/cocodrilo.png"},
- {nombre:"Perro", img:"img/perro.png"},
- {nombre:"Gato", img:"img/gato.png"},
- {nombre:"Tigre", img:"img/tigre.png"}
+    "perro",
+    "gato",
+    "leon",
+    "tigre",
+    "cocodrilo",
+    "mono",
+    "jirafa"
 ];
 
-let indice = 0;
 let puntos = 0;
+let animalCorrecto = "";
 
 const animalObjetivo = document.getElementById("animalObjetivo");
 const opcionesDiv = document.getElementById("opciones");
-const resultado = document.getElementById("resultado");
-const nombreAnimal = document.getElementById("nombreAnimal");
-const puntosDiv = document.getElementById("puntos");
+const resultadoDiv = document.getElementById("resultado");
+const puntosSpan = document.getElementById("puntos");
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-function cargarJuego(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    resultado.textContent = "";
-    nombreAnimal.textContent = "";
-
-    const actual = animales[indice];
-    animalObjetivo.src = actual.img;
+function iniciarJuego() {
+    resultadoDiv.textContent = "";
     opcionesDiv.innerHTML = "";
 
-    let opciones = [...animales]
-        .sort(()=>Math.random()-0.5)
-        .slice(0,2);
+    animalCorrecto = animales[Math.floor(Math.random() * animales.length)];
+    animalObjetivo.src = `img/${animalCorrecto}.jpg`;
 
-    if(!opciones.includes(actual)) opciones.push(actual);
-    opciones.sort(()=>Math.random()-0.5);
+    let opciones = [animalCorrecto];
 
-    opciones.forEach(animal=>{
+    while (opciones.length < 3) {
+        let random = animales[Math.floor(Math.random() * animales.length)];
+        if (!opciones.includes(random)) {
+            opciones.push(random);
+        }
+    }
+
+    opciones.sort(() => Math.random() - 0.5);
+
+    opciones.forEach(animal => {
         const img = document.createElement("img");
-        img.src = animal.img;
-        img.onclick = ()=>comprobar(animal, img);
+        img.src = `img/${animal}.jpg`;
+        img.className = "animal";
+
+        img.onclick = () => comprobar(animal);
         opcionesDiv.appendChild(img);
     });
 }
 
-function comprobar(animal,img){
-    if(animal.nombre === animales[indice].nombre){
-        dibujarLinea(animalObjetivo,img,"green");
-        resultado.textContent = "👍";
-        nombreAnimal.textContent = "¡Es un " + animal.nombre + "!";
+function comprobar(animal) {
+    if (animal === animalCorrecto) {
+        resultadoDiv.textContent = "👍";
         puntos++;
-        puntosDiv.textContent = "⭐ Puntos: " + puntos;
-
-        setTimeout(()=>{
-            indice = (indice + 1) % animales.length;
-            cargarJuego();
-        },1500);
-    }else{
-        dibujarLinea(animalObjetivo,img,"red");
-        resultado.textContent = "❌";
-        setTimeout(()=>{
-            resultado.textContent="";
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-        },800);
+        puntosSpan.textContent = puntos;
+        setTimeout(iniciarJuego, 1000);
+    } else {
+        resultadoDiv.textContent = "❌";
+        setTimeout(() => resultadoDiv.textContent = "", 800);
     }
 }
 
-function dibujarLinea(origen,destino,color){
-    const r1 = origen.getBoundingClientRect();
-    const r2 = destino.getBoundingClientRect();
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.moveTo(r1.right, r1.top + r1.height/2);
-    ctx.lineTo(r2.left, r2.top + r2.height/2);
-    ctx.stroke();
-}
-
-cargarJuego();
+iniciarJuego();
 </script>
 
 </body>
