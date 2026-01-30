@@ -36,11 +36,12 @@ h1{
 }
 
 .left img{
-    width:260px;
-    height:200px;
+    width:280px;
+    height:220px;
     object-fit:cover;
-    border-radius:20px;
+    border-radius:25px;
     border:6px dashed #fff;
+    background:#fff;
 }
 
 .right{
@@ -49,13 +50,14 @@ h1{
 }
 
 .right img{
-    width:160px;
-    height:200px;
+    width:180px;
+    height:220px;
     object-fit:cover;
+    border-radius:20px;
     cursor:pointer;
-    border-radius:15px;
     border:5px solid transparent;
     transition:0.3s;
+    background:#fff;
 }
 
 .right img:hover{
@@ -100,7 +102,7 @@ canvas{
 <canvas id="canvas"></canvas>
 
 <script>
-// ================== VOZ ==================
+// 🔊 VOZ EN ESPAÑOL
 function hablar(texto){
     const voz = new SpeechSynthesisUtterance(texto);
     voz.lang = "es-ES";
@@ -108,37 +110,31 @@ function hablar(texto){
     speechSynthesis.speak(voz);
 }
 
-// ================== ANIMALES REALES ==================
+// 🐶 ANIMALES (IMÁGENES COMPLETAS)
 const animales = [
 {
-    nombre:"perro",
-    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Golden_Retriever_half_left.jpg/512px-Golden_Retriever_half_left.jpg",
-    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Golden_Retriever_half_right.jpg/512px-Golden_Retriever_half_right.jpg"
+ nombre:"perro",
+ img:"https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=60"
 },
 {
-    nombre:"gato",
-    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat_half_left.jpg/512px-Cat_half_left.jpg",
-    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat_half_right.jpg/512px-Cat_half_right.jpg"
+ nombre:"gato",
+ img:"https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=800&q=60"
 },
 {
-    nombre:"león",
-    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_half_left.jpg/512px-Lion_half_left.jpg",
-    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_half_right.jpg/512px-Lion_half_right.jpg"
+ nombre:"león",
+ img:"https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=800&q=60"
 },
 {
-    nombre:"jirafa",
-    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Giraffe_half_left.jpg/512px-Giraffe_half_left.jpg",
-    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Giraffe_half_right.jpg/512px-Giraffe_half_right.jpg"
+ nombre:"jirafa",
+ img:"https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=800&q=60"
 },
 {
-    nombre:"cebra",
-    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Zebra_half_left.jpg/512px-Zebra_half_left.jpg",
-    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Zebra_half_right.jpg/512px-Zebra_half_right.jpg"
+ nombre:"cebra",
+ img:"https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=60"
 },
 {
-    nombre:"cocodrilo",
-    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Crocodile_half_left.jpg/512px-Crocodile_half_left.jpg",
-    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Crocodile_half_right.jpg/512px-Crocodile_half_right.jpg"
+ nombre:"cocodrilo",
+ img:"https://images.unsplash.com/photo-1610878180933-1237283c9f2e?auto=format&fit=crop&w=800&q=60"
 }
 ];
 
@@ -161,34 +157,40 @@ function cargar(){
     feedback.textContent="";
     animalName.textContent="";
 
-    leftImg.src = animales[indice].izquierda;
+    const actual = animales[indice];
+    leftImg.src = actual.img;
+
     optionsDiv.innerHTML="";
 
-    let opciones = animales.map(a=>a.derecha).sort(()=>Math.random()-0.5).slice(0,2);
-    opciones.push(animales[indice].derecha);
+    let opciones = animales
+        .filter(a => a !== actual)
+        .sort(()=>Math.random()-0.5)
+        .slice(0,2);
+
+    opciones.push(actual);
     opciones.sort(()=>Math.random()-0.5);
 
-    opciones.forEach(src=>{
+    opciones.forEach(op=>{
         const img = document.createElement("img");
-        img.src = src;
-        img.onclick = ()=>comprobar(src,img);
+        img.src = op.img;
+        img.onclick = ()=>comprobar(op,img);
         optionsDiv.appendChild(img);
     });
 }
 
-function comprobar(src,img){
-    if(src === animales[indice].derecha){
+function comprobar(op,img){
+    if(op === animales[indice]){
         dibujarLinea(leftImg,img,"green");
         feedback.textContent="👍";
-        animalName.textContent="¡Es un " + animales[indice].nombre + "!";
-        hablar("¡Es un " + animales[indice].nombre + "!");
+        animalName.textContent="¡Es un " + op.nombre + "!";
+        hablar("¡Muy bien! Es un " + op.nombre);
         puntos++;
         score.textContent="⭐ Puntos: " + puntos;
 
         setTimeout(()=>{
-            indice = (indice+1)%animales.length;
+            indice = (indice + 1) % animales.length;
             cargar();
-        },1600);
+        },1500);
     }else{
         dibujarLinea(leftImg,img,"red");
         feedback.textContent="❌";
@@ -203,6 +205,7 @@ function comprobar(src,img){
 function dibujarLinea(a,b,color){
     const r1 = a.getBoundingClientRect();
     const r2 = b.getBoundingClientRect();
+
     ctx.strokeStyle=color;
     ctx.lineWidth=6;
     ctx.beginPath();
