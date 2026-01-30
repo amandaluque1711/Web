@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>🐾 Adivina el Animal 🐾</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    padding:20px;
+    font-family:'Baloo 2', cursive;
+    background: linear-gradient(135deg,#ffda77,#ff8fab);
+    text-align:center;
+    overflow:hidden;
+}
+
+h1{
+    color:#fff;
+    font-size:3em;
+    text-shadow:3px 3px #ff5d8f;
+}
+
+#score{
+    font-size:1.6em;
+    color:#fff;
+    margin-top:10px;
+}
+
+.game{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:80px;
+    margin-top:40px;
+}
+
+.left img{
+    width:220px;
+    background:white;
+    border-radius:25px;
+    padding:10px;
+    border:6px dashed #fff;
+}
+
+.right{
+    display:flex;
+    gap:20px;
+}
+
+.right img{
+    width:140px;
+    background:white;
+    border-radius:20px;
+    padding:8px;
+    cursor:pointer;
+    transition:0.3s;
+    border:5px solid transparent;
+}
+
+.right img:hover{
+    transform:scale(1.1);
+    border-color:#4CAF50;
+}
+
+#feedback{
+    font-size:5em;
+    height:80px;
+    margin-top:10px;
+}
+
+#animalName{
+    font-size:2em;
+    color:#fff;
+    margin-top:5px;
+}
+
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🐾 Adivina el Animal 🐾</h1>
+<div id="score">⭐ Puntos: 0</div>
+
+<div class="game">
+    <div class="left">
+        <img id="leftAnimal">
+    </div>
+    <div class="right" id="options"></div>
+</div>
+
+<div id="feedback"></div>
+<div id="animalName"></div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+// 🔊 SONIDOS
+const soundOk = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_9e5e1c0d1f.mp3");
+const soundFail = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_3b0c1e6c91.mp3");
+
+// 🐶 ANIMALES (cambia imágenes cuando quieras)
+const animals = [
+ {name:"Perro", left:"https://i.imgur.com/yK7QG7k.png", right:"https://i.imgur.com/7W4V7zE.png"},
+ {name:"Gato", left:"https://i.imgur.com/Zd4V7kM.png", right:"https://i.imgur.com/0YQFZ7F.png"},
+ {name:"León", left:"https://i.imgur.com/rA7GZzM.png", right:"https://i.imgur.com/9w6G8ZB.png"}
+];
+
+let index = 0;
+let score = 0;
+
+const leftImg = document.getElementById("leftAnimal");
+const optionsDiv = document.getElementById("options");
+const feedback = document.getElementById("feedback");
+const animalName = document.getElementById("animalName");
+const scoreDiv = document.getElementById("score");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function loadGame(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    feedback.textContent = "";
+    animalName.textContent = "";
+
+    const animal = animals[index];
+    leftImg.src = animal.left;
+    optionsDiv.innerHTML = "";
+
+    let options = animals.map(a=>a.right).sort(()=>Math.random()-0.5).slice(0,2);
+    options.push(animal.right);
+    options.sort(()=>Math.random()-0.5);
+
+    options.forEach(src=>{
+        const img = document.createElement("img");
+        img.src = src;
+        img.onclick = ()=>check(src,img);
+        optionsDiv.appendChild(img);
+    });
+}
+
+function check(src,img){
+    const correct = animals[index];
+
+    if(src === correct.right){
+        soundOk.play();
+        drawLine(leftImg,img,"green");
+        feedback.textContent = "👍";
+        animalName.textContent = "¡Es un " + correct.name + "!";
+        score++;
+        scoreDiv.textContent = "⭐ Puntos: " + score;
+
+        setTimeout(()=>{
+            index = (index + 1) % animals.length;
+            loadGame();
+        },1500);
+    }else{
+        soundFail.play();
+        drawLine(leftImg,img,"red");
+        feedback.textContent = "❌";
+        setTimeout(()=>{
+            feedback.textContent="";
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+        },800);
+    }
+}
+
+function drawLine(from,to,color){
+    const r1 = from.getBoundingClientRect();
+    const r2 = to.getBoundingClientRect();
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(r1.right, r1.top + r1.height/2);
+    ctx.lineTo(r2.left, r2.top + r2.height/2);
+    ctx.stroke();
+}
+
+loadGame();
+</script>
+
+</body>
+</html>
