@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <title>🐾 Adivina el Animal 🐾</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
 
 <style>
 body{
     margin:0;
     padding:20px;
     font-family:'Baloo 2', cursive;
-    background: linear-gradient(135deg,#ffde7d,#ff7a7a);
+    background: linear-gradient(135deg,#ffd166,#ef476f);
     text-align:center;
     overflow:hidden;
 }
@@ -19,49 +19,46 @@ body{
 h1{
     color:#fff;
     font-size:3em;
-    text-shadow:3px 3px #ff4d6d;
+    text-shadow:3px 3px #ff006e;
 }
 
 #score{
-    font-size:1.7em;
     color:#fff;
+    font-size:1.6em;
 }
 
 .game{
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:90px;
+    gap:80px;
     margin-top:40px;
 }
 
-.panel{
-    width:240px;
-    height:240px;
-    background:white;
-    border-radius:30px;
-    border:6px dashed #ffd166;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.left img{
+    width:260px;
+    height:200px;
+    object-fit:cover;
+    border-radius:20px;
+    border:6px dashed #fff;
 }
 
-.options{
+.right{
     display:flex;
-    gap:25px;
+    gap:20px;
 }
 
-.option{
+.right img{
     width:160px;
-    height:240px;
-    background:white;
-    border-radius:25px;
+    height:200px;
+    object-fit:cover;
     cursor:pointer;
+    border-radius:15px;
     border:5px solid transparent;
     transition:0.3s;
 }
 
-.option:hover{
+.right img:hover{
     transform:scale(1.1);
     border-color:#06d6a0;
 }
@@ -72,7 +69,7 @@ h1{
 }
 
 #animalName{
-    font-size:2.2em;
+    font-size:2em;
     color:#fff;
 }
 
@@ -91,8 +88,10 @@ canvas{
 <div id="score">⭐ Puntos: 0</div>
 
 <div class="game">
-    <div class="panel" id="left"></div>
-    <div class="options" id="options"></div>
+    <div class="left">
+        <img id="leftImg">
+    </div>
+    <div class="right" id="options"></div>
 </div>
 
 <div id="feedback"></div>
@@ -109,63 +108,45 @@ function hablar(texto){
     speechSynthesis.speak(voz);
 }
 
-// ================== ANIMALES SVG ==================
+// ================== ANIMALES REALES ==================
 const animales = [
 {
     nombre:"perro",
-    izquierda:`
-    <svg width="220" height="220">
-        <rect x="0" y="0" width="110" height="220" fill="#cdb4db"/>
-        <circle cx="90" cy="90" r="45" fill="#ffc8dd"/>
-        <circle cx="75" cy="80" r="6"/>
-        <rect x="60" y="130" width="40" height="50" rx="20" fill="#ffc8dd"/>
-    </svg>`,
-    derecha:`
-    <svg width="220" height="220">
-        <rect x="110" y="0" width="110" height="220" fill="#cdb4db"/>
-        <circle cx="125" cy="80" r="6"/>
-        <rect x="110" y="110" width="70" height="40" rx="20" fill="#ffc8dd"/>
-    </svg>`
+    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Golden_Retriever_half_left.jpg/512px-Golden_Retriever_half_left.jpg",
+    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Golden_Retriever_half_right.jpg/512px-Golden_Retriever_half_right.jpg"
 },
 {
     nombre:"gato",
-    izquierda:`
-    <svg width="220" height="220">
-        <rect x="0" y="0" width="110" height="220" fill="#bde0fe"/>
-        <polygon points="30,20 60,60 20,60" fill="#a2d2ff"/>
-        <circle cx="85" cy="95" r="40" fill="#a2d2ff"/>
-        <circle cx="70" cy="85" r="6"/>
-    </svg>`,
-    derecha:`
-    <svg width="220" height="220">
-        <rect x="110" y="0" width="110" height="220" fill="#bde0fe"/>
-        <circle cx="125" cy="85" r="6"/>
-        <path d="M125 115 Q135 125 145 115" stroke="#000" stroke-width="4" fill="none"/>
-    </svg>`
+    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat_half_left.jpg/512px-Cat_half_left.jpg",
+    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat_half_right.jpg/512px-Cat_half_right.jpg"
 },
 {
     nombre:"león",
-    izquierda:`
-    <svg width="220" height="220">
-        <rect x="0" y="0" width="110" height="220" fill="#ffd166"/>
-        <circle cx="85" cy="95" r="50" fill="#f4a261"/>
-        <circle cx="70" cy="85" r="6"/>
-    </svg>`,
-    derecha:`
-    <svg width="220" height="220">
-        <rect x="110" y="0" width="110" height="220" fill="#ffd166"/>
-        <circle cx="125" cy="85" r="6"/>
-        <rect x="110" y="120" width="70" height="30" rx="15" fill="#e76f51"/>
-    </svg>`
+    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_half_left.jpg/512px-Lion_half_left.jpg",
+    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_half_right.jpg/512px-Lion_half_right.jpg"
+},
+{
+    nombre:"jirafa",
+    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Giraffe_half_left.jpg/512px-Giraffe_half_left.jpg",
+    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Giraffe_half_right.jpg/512px-Giraffe_half_right.jpg"
+},
+{
+    nombre:"cebra",
+    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Zebra_half_left.jpg/512px-Zebra_half_left.jpg",
+    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Zebra_half_right.jpg/512px-Zebra_half_right.jpg"
+},
+{
+    nombre:"cocodrilo",
+    izquierda:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Crocodile_half_left.jpg/512px-Crocodile_half_left.jpg",
+    derecha:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Crocodile_half_right.jpg/512px-Crocodile_half_right.jpg"
 }
 ];
 
-// ================== LÓGICA ==================
 let indice = 0;
 let puntos = 0;
 
-const left = document.getElementById("left");
-const options = document.getElementById("options");
+const leftImg = document.getElementById("leftImg");
+const optionsDiv = document.getElementById("options");
 const feedback = document.getElementById("feedback");
 const animalName = document.getElementById("animalName");
 const score = document.getElementById("score");
@@ -180,25 +161,24 @@ function cargar(){
     feedback.textContent="";
     animalName.textContent="";
 
-    left.innerHTML = animales[indice].izquierda;
-    options.innerHTML="";
+    leftImg.src = animales[indice].izquierda;
+    optionsDiv.innerHTML="";
 
     let opciones = animales.map(a=>a.derecha).sort(()=>Math.random()-0.5).slice(0,2);
     opciones.push(animales[indice].derecha);
     opciones.sort(()=>Math.random()-0.5);
 
-    opciones.forEach(svg=>{
-        const div = document.createElement("div");
-        div.className="option";
-        div.innerHTML = svg;
-        div.onclick = ()=>comprobar(svg,div);
-        options.appendChild(div);
+    opciones.forEach(src=>{
+        const img = document.createElement("img");
+        img.src = src;
+        img.onclick = ()=>comprobar(src,img);
+        optionsDiv.appendChild(img);
     });
 }
 
-function comprobar(svg,div){
-    if(svg === animales[indice].derecha){
-        dibujarLinea(left,div,"green");
+function comprobar(src,img){
+    if(src === animales[indice].derecha){
+        dibujarLinea(leftImg,img,"green");
         feedback.textContent="👍";
         animalName.textContent="¡Es un " + animales[indice].nombre + "!";
         hablar("¡Es un " + animales[indice].nombre + "!");
@@ -210,7 +190,7 @@ function comprobar(svg,div){
             cargar();
         },1600);
     }else{
-        dibujarLinea(left,div,"red");
+        dibujarLinea(leftImg,img,"red");
         feedback.textContent="❌";
         hablar("Inténtalo otra vez");
         setTimeout(()=>{
